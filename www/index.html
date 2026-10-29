@@ -21,7 +21,7 @@
     </div>
     <form id="locForm" class="loc" autocomplete="off">
       <label for="locInput" class="sr">Grid square or latitude, longitude</label>
-      <input id="locInput" name="loc" spellcheck="false" placeholder="Grid square (GK03ec) or 13.10, -59.62" value="">
+      <input id="locInput" name="loc" spellcheck="false" placeholder="Type your grid square (GK03ec) or 13.10, -59.62" value="">
       <button type="submit" class="btn primary">Pinpoint</button>
       <button type="button" id="gpsBtn" class="btn icon" title="Use my location" aria-label="Use my location">
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4" stroke="currentColor" stroke-width="2"/></svg>
@@ -65,7 +65,8 @@
 
     <div class="layers" role="group" aria-label="Map layers">
       <label class="chip"><input type="checkbox" id="lyNight" checked><span>Day / night</span></label>
-      <label class="chip"><input type="checkbox" id="lyGrid" checked><span>Grid squares</span></label>
+      <label class="chip"><input type="checkbox" id="lyGrid" checked><span>My grid square</span></label>
+      <label class="chip"><input type="checkbox" id="lyGridall"><span>Full grid</span></label>
       <label class="chip"><input type="checkbox" id="lySat"><span>Satellite</span></label>
       <label class="chip"><input type="checkbox" id="lySarg" checked><span>Sargassum</span></label>
       <label class="chip"><input type="checkbox" id="lyDrift" checked><span>Drift 48h</span></label>
@@ -78,7 +79,7 @@
       <header><h2>Reference point</h2><span class="src" id="pointSrc">grid</span></header>
       <div class="point-grid">
         <div class="big-grid" id="pGrid">—</div>
-        <button type="button" class="btn ghost small" id="copyBtn">Copy</button>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button type="button" class="btn ghost small" id="homeBtn">Set as my home</button><button type="button" class="btn ghost small" id="copyBtn">Copy</button></div>
       </div>
       <dl class="kv cols2">
         <div><dt>Latitude</dt><dd id="pLat">—</dd></div>

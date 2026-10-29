@@ -13,7 +13,7 @@
       this.mode = 'geochron';
       this.k = 1; this.center = [-40, 15]; this.rot = [-59.6, 13.1];
       this.point = null; this.label = '';
-      this.layers = { night: true, grid: true, sat: false, sarg: true, drift: true };
+      this.layers = { night: true, grid: true, gridall: false, sat: false, sarg: true, drift: true };
       this.overlays = { sat: null, sarg: null };
       this.sampleBlobs = null; this.drift = null; this.vectors = null;
       this.onPick = onPick; this.onView = onView;
@@ -212,7 +212,8 @@
       // graticule
       ctx.beginPath(); path(this.graticule); ctx.strokeStyle = pal.grat; ctx.lineWidth = 0.5; ctx.stroke();
 
-      if (this.layers.grid) this.drawMaidenhead(proj, path);
+      if (this.layers.gridall) this.drawMaidenhead(proj, path);
+      if (this.layers.grid) this.drawPinGrid(proj, path);
       if (this.layers.night) this.drawNight(path);
       this.drawSun(proj);
       if (this.layers.drift && this.drift) this.drawDrift(proj, path);
@@ -255,6 +256,52 @@
       ctx.strokeStyle = pal.sun; ctx.fillStyle = pal.sun; ctx.lineWidth = 1.4;
       ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI * 2); ctx.fill();
       for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; ctx.beginPath(); ctx.moveTo(Math.cos(a) * 8, Math.sin(a) * 8); ctx.lineTo(Math.cos(a) * 12, Math.sin(a) * 12); ctx.stroke(); }
+      ctx.restore();
+    }
+
+    /** Only the grid squares around the pinpointed spot: field (dashed), square (solid), subsquare when zoomed in. */
+    drawPinGrid(proj, path) {
+      if (!this.point) return;
+      const { ctx, pal } = this, { lat, lon } = this.point;
+      if (this.mode === 'god' && d3.geoDistance([lon, lat], this.rot) > Math.PI / 2) return;
+      const ring = ([w, s, e, n]) => {
+        const pts = [], st = Math.max(0.02, Math.min(1, (e - w) / 20));
+        for (let x = w; x < e; x += st) pts.push([x, n]);
+        for (let y = n; y > s; y -= st) pts.push([e, y]);
+        for (let x = e; x > w; x -= st) pts.push([x, s]);
+        for (let y = s; y < n; y += st) pts.push([w, y]);
+        pts.push([w, n]);
+        return { type: 'Polygon', coordinates: [pts.reverse()] };
+      };
+      const g6 = Geo.toGrid(lat, lon, 6), dpp = this.degPerPx();
+      const field = Geo.fromGrid(g6.slice(0, 2)).bounds, square = Geo.fromGrid(g6.slice(0, 4)).bounds, sub = Geo.fromGrid(g6).bounds;
+      const font = css('--font-data') || 'monospace';
+      const pin = proj([lon, lat]);
+      // label goes in the corner of its box that is farthest from the pin, so it never sits under the pin's own label
+      const label = (text, b, size) => {
+        ctx.font = `700 ${size}px ${font}`; const tw = ctx.measureText(text).width + 10, th = size + 8;
+        let best = null;
+        for (const [cx, cy, dx, dy] of [[b[0], b[3], 1, 1], [b[2], b[3], -1, 1], [b[0], b[1], 1, -1], [b[2], b[1], -1, -1]]) {
+          const p = proj([cx, cy]); if (!p) continue;
+          const x = dx > 0 ? p[0] + 3 : p[0] - 3 - tw, y = dy > 0 ? p[1] + 3 : p[1] - 3 - th;
+          const d = pin ? Math.hypot(x + tw / 2 - pin[0], y + th / 2 - pin[1]) : 0;
+          if (!best || d > best.d) best = { x, y, d };
+        }
+        if (!best) return;
+        ctx.fillStyle = 'rgba(7,11,18,0.78)'; ctx.fillRect(best.x, best.y, tw, th);
+        ctx.fillStyle = pal.gridText; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(text, best.x + 5, best.y + 4);
+      };
+      ctx.save();
+      // field: 20 x 10 degrees
+      ctx.beginPath(); path(ring(field)); ctx.setLineDash([6, 5]); ctx.strokeStyle = pal.grid; ctx.lineWidth = 1.2; ctx.stroke(); ctx.setLineDash([]);
+      if (20 / dpp > 60) label(g6.slice(0, 2), field, 12);
+      // square: 2 x 1 degrees
+      const sqPx = 2 / dpp;
+      ctx.beginPath(); path(ring(square)); ctx.fillStyle = 'rgba(232,176,74,0.08)'; ctx.fill();
+      ctx.strokeStyle = pal.accent; ctx.lineWidth = 1.8; ctx.stroke();
+      if (sqPx > 40) label(g6.slice(0, 4), square, 12);
+      // subsquare: 5 x 2.5 minutes, once it is big enough to see
+      if ((1 / 12) / dpp > 14) { ctx.beginPath(); path(ring(sub)); ctx.strokeStyle = pal.accent; ctx.lineWidth = 1.2; ctx.setLineDash([3, 3]); ctx.stroke(); ctx.setLineDash([]); if ((1 / 12) / dpp > 70) label(g6, sub, 11); }
       ctx.restore();
     }
 

@@ -75,7 +75,7 @@
   /* ---------- map ---------- */
   const view = new EagleView($('map'), { onPick: (lat, lon) => setLocation({ lat, lon, grid: Geo.toGrid(lat, lon, 6), source: 'map' }, { recenter: false }) });
   view.layers = Object.assign(view.layers, store.get('layers', {}));
-  ['Night', 'Grid', 'Sat', 'Sarg', 'Drift'].forEach((n) => {
+  ['Night', 'Grid', 'Gridall', 'Sat', 'Sarg', 'Drift'].forEach((n) => {
     const key = n.toLowerCase(), box = $('ly' + n);
     box.checked = !!view.layers[key];
     box.addEventListener('change', () => {
@@ -125,6 +125,17 @@
   window.addEventListener('hashchange', () => {
     const h = decodeURIComponent(location.hash.slice(1));
     if (h && h !== state.grid && Geo.isGrid(h)) { try { setLocation(Geo.parse(h)); } catch (e) { /* ignore */ } }
+  });
+  function renderHomeBtn() {
+    const home = store.get('home', null), b = $('homeBtn'); if (!b) return;
+    const isHome = home && state.grid && home.grid === state.grid;
+    b.textContent = isHome ? '\u2713 My home' : 'Set as my home'; b.disabled = !!isHome;
+    b.title = home ? 'Your home is ' + home.grid + '. Eagle opens here.' : 'Eagle will open on this grid square every time';
+  }
+  $('homeBtn').addEventListener('click', () => {
+    store.set('home', { lat: state.lat, lon: state.lon, grid: state.grid, source: state.source });
+    renderHomeBtn();
+    $('homeBtn').textContent = '\u2713 Saved as home';
   });
   $('copyBtn').addEventListener('click', async () => {
     const txt = `${state.grid}  ${state.lat.toFixed(5)}, ${state.lon.toFixed(5)}`;
@@ -215,6 +226,7 @@
 
   /* ---------- rendering ---------- */
   function renderPoint() {
+    renderHomeBtn();
     if (state.lat == null) return;
     const now = new Date();
     $('pGrid').textContent = state.grid;
@@ -472,7 +484,7 @@
   let start = null;
   const h = decodeURIComponent(location.hash.slice(1));
   if (h && Geo.isGrid(h)) { try { start = Geo.parse(h); } catch (e) { start = null; } }
-  if (!start) start = store.get('last', null);
+  if (!start) start = store.get('home', null) || store.get('last', null);
   if (!start) { const s = EagleSample.home; start = { lat: s.lat, lon: s.lon, grid: Geo.toGrid(s.lat, s.lon, 6), source: 'coords' }; }
   setLocation(start, { recenter: true });
   schedule();
