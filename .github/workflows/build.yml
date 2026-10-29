@@ -1,6 +1,11 @@
 name: Build Eagle
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Publish a release with this version tag (for example v1.0.0). Leave empty to only build.'
+        required: false
+        default: ''
   push:
     tags: ['v*']
 permissions:
@@ -80,11 +85,29 @@ jobs:
       - uses: actions/upload-artifact@v4
         with: { name: eagle-ios, path: Eagle-ios-unsigned.ipa }
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
     needs: [desktop, android, ios]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with: { path: out, merge-multiple: true }
       - uses: softprops/action-gh-release@v2
-        with: { files: out/**/* }
+        with:
+          tag_name: ${{ inputs.release_tag || github.ref_name }}
+          target_commitish: ${{ github.sha }}
+          name: Eagle ${{ inputs.release_tag || github.ref_name }}
+          make_latest: true
+          body: |
+            Eagle: god-view globe and geochron map with live weather, air quality, marine, aviation and sargassum data.
+
+            | Device | Download |
+            |---|---|
+            | Windows | Eagle-Setup (installer) or Eagle-Portable .exe |
+            | Mac | .dmg (Apple Silicon and Intel) |
+            | Linux | .AppImage or .deb (x64) |
+            | Raspberry Pi | arm64 or armv7l .AppImage / .deb |
+            | Android | Eagle-android.apk |
+            | iPhone / iPad | Eagle-ios-unsigned.ipa (re-sign with your Apple ID) |
+
+            Unsigned builds: Windows shows SmartScreen (More info > Run anyway); on Mac right-click > Open the first time.
+          files: out/**/*
