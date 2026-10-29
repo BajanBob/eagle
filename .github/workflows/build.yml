@@ -98,7 +98,7 @@ jobs:
           name: Eagle ${{ inputs.release_tag || github.ref_name }}
           make_latest: true
           body: |
-            Eagle: god-view globe and geochron map with live weather, air quality, marine, aviation and sargassum data.
+            Eagle: world map and globe with live weather, air quality, marine, aviation and sargassum data.
 
             | Device | Download |
             |---|---|

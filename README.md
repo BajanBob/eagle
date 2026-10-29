@@ -1,6 +1,6 @@
 # Eagle
 
-God-view globe and geochron map that pulls weather, cloud cover, wind, dew point, humidity, UV, air quality, waves, ocean drift and sargassum for one reference point. Set the point with a Maidenhead grid square (`GK03ec`), latitude/longitude (`13.10, -59.62`, `13°06'N 59°37'W`), device location, or a tap on the map.
+A world map and globe that pull weather, cloud cover, wind, dew point, humidity, UV, air quality, waves, ocean drift and sargassum for one reference point. Set the point with a Maidenhead grid square (`GK03ec`), latitude/longitude (`13.10, -59.62`, `13°06'N 59°37'W`), device location, or a tap on the map.
 
 One shared app (`www/`) runs everywhere:
 
@@ -83,8 +83,8 @@ All requests in the desktop and phone apps go through the native layer (Electron
 
 ## Map
 
-- **Geochron:** equirectangular world with the live day/night terminator and civil, nautical and astronomical twilight bands. The strip along the bottom shows local solar time at each meridian; `12` marks where the sun is highest right now.
-- **God View:** orthographic globe. Drag to spin, scroll or pinch to zoom.
+- **Map:** flat world map with the live day/night terminator and civil, nautical and astronomical twilight bands. The strip along the bottom shows local solar time at each meridian; `12` marks where the sun is highest right now.
+- **Globe:** a 3D globe. Drag to spin, scroll or pinch to zoom.
 - Maidenhead fields (`GK`) are labelled at world scale; zoom in and 2°×1° squares (`GK03`) appear.
 - Tap anywhere to move the reference point. A link ending in `#GK03ec` opens Eagle on that square.
 

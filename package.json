@@ -3,7 +3,7 @@
   "productName": "Eagle",
   "version": "1.1.0",
   "private": true,
-  "description": "Eagle: god-view globe and geochron map with live weather, air quality, marine, aviation and sargassum data for any grid square or lat/lon.",
+  "description": "Eagle: world map and globe with live weather, air quality, marine, aviation and sargassum data for any grid square or lat/lon.",
   "main": "electron/main.js",
   "author": {
     "name": "Eagle",
@@ -52,7 +52,7 @@
       "desktop": {
         "entry": {
           "Name": "Eagle",
-          "Comment": "God-view globe and geochron weather map"
+          "Comment": "World map and globe with live weather"
         }
       }
     },

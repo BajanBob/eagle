@@ -1,5 +1,5 @@
 /* Eagle — map engine. Two views share one renderer:
- *   "geochron": equirectangular world with live day/night terminator and solar-hour strip
+ *   "geochron" (shown as Map): flat world with live day/night line and solar-hour strip
  *   "god":      orthographic globe you can spin and zoom
  */
 (function () {
