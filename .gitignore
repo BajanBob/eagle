@@ -1,0 +1,6 @@
+node_modules/
+dist/
+dist-single/
+android/
+ios/
+.DS_Store

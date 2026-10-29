@@ -1,0 +1,12 @@
+{
+  "appId": "com.eagle.globe",
+  "appName": "Eagle",
+  "webDir": "www",
+  "backgroundColor": "#0a1018",
+  "plugins": {
+    "CapacitorHttp": { "enabled": true },
+    "SplashScreen": { "backgroundColor": "#0a1018", "launchShowDuration": 600 }
+  },
+  "android": { "allowMixedContent": false },
+  "ios": { "contentInset": "never" }
+}

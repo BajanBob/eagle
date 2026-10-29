@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https: capacitor: http://localhost">
+<title>Eagle</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#0a1018">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!--EAGLE:BODY-->
+<header class="bar">
+  <div class="bar-in">
+    <div class="brand" aria-label="Eagle">
+      <svg viewBox="0 0 40 40" width="28" height="28" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 20h30M20 3v34" stroke="currentColor" stroke-width="1" opacity=".45"/><path d="M8 23c5-6 9-8 12-8s7 2 12 8c-4-2-8-2-12 2-4-4-8-4-12-2z" fill="currentColor"/></svg>
+      <span>EAGLE</span>
+    </div>
+    <form id="locForm" class="loc" autocomplete="off">
+      <label for="locInput" class="sr">Grid square or latitude, longitude</label>
+      <input id="locInput" name="loc" spellcheck="false" placeholder="Grid square (GK03ec) or 13.10, -59.62" value="">
+      <button type="submit" class="btn primary">Pinpoint</button>
+      <button type="button" id="gpsBtn" class="btn icon" title="Use my location" aria-label="Use my location">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+    </form>
+    <div class="bar-right">
+      <button type="button" id="refreshBtn" class="btn ghost" title="Refresh all feeds">Refresh</button>
+      <button type="button" id="settingsBtn" class="btn ghost">Settings</button>
+    </div>
+  </div>
+  <p id="locError" class="loc-error" role="alert" hidden></p>
+</header>
+
+<div id="sampleBanner" class="banner" hidden>
+  <strong>Sample data.</strong> <span id="sampleText">Live feeds can’t be reached from here, so readings below are illustrative values for Bridgetown, Barbados. The installed apps pull live data from every source.</span>
+</div>
+
+<main class="shell">
+  <section class="stage" aria-label="Map">
+    <div class="canvas-wrap"><canvas id="map" tabindex="0" aria-label="World map. Drag to pan, scroll or pinch to zoom, tap to pinpoint."></canvas></div>
+
+    <div class="hud">
+      <div class="hud-grid" id="hudGrid">—</div>
+      <div class="hud-row"><span class="k">UTC</span><span id="hudUtc" class="v">--:--:--</span></div>
+      <div class="hud-row"><span class="k">LOCAL</span><span id="hudLocal" class="v">--:--</span></div>
+      <div class="hud-row"><span class="k">SUN</span><span id="hudSun" class="v">—</span></div>
+    </div>
+
+    <div class="viewseg" role="tablist" aria-label="View">
+      <button role="tab" id="vGeo" aria-selected="true" data-mode="geochron">Geochron</button>
+      <button role="tab" id="vGod" aria-selected="false" data-mode="god">God View</button>
+    </div>
+
+    <div class="zoom">
+      <button type="button" class="btn icon" id="zIn" aria-label="Zoom in">+</button>
+      <button type="button" class="btn icon" id="zOut" aria-label="Zoom out">−</button>
+      <button type="button" class="btn icon" id="zHome" aria-label="Center on point" title="Center on point">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+      </button>
+    </div>
+
+    <div class="layers" role="group" aria-label="Map layers">
+      <label class="chip"><input type="checkbox" id="lyNight" checked><span>Day / night</span></label>
+      <label class="chip"><input type="checkbox" id="lyGrid" checked><span>Grid squares</span></label>
+      <label class="chip"><input type="checkbox" id="lySat"><span>Satellite</span></label>
+      <label class="chip"><input type="checkbox" id="lySarg" checked><span>Sargassum</span></label>
+      <label class="chip"><input type="checkbox" id="lyDrift" checked><span>Drift 48h</span></label>
+    </div>
+    <p class="layer-note" id="layerNote"></p>
+  </section>
+
+  <aside class="panel" id="panel" aria-label="Conditions at the reference point">
+    <article class="card point">
+      <header><h2>Reference point</h2><span class="src" id="pointSrc">grid</span></header>
+      <div class="point-grid">
+        <div class="big-grid" id="pGrid">—</div>
+        <button type="button" class="btn ghost small" id="copyBtn">Copy</button>
+      </div>
+      <dl class="kv cols2">
+        <div><dt>Latitude</dt><dd id="pLat">—</dd></div>
+        <div><dt>Longitude</dt><dd id="pLon">—</dd></div>
+        <div><dt>Solar elevation</dt><dd id="pEl">—</dd></div>
+        <div><dt>Light</dt><dd id="pPhase">—</dd></div>
+        <div><dt>Next sunrise</dt><dd id="pRise">—</dd></div>
+        <div><dt>Next sunset</dt><dd id="pSet">—</dd></div>
+      </dl>
+    </article>
+    <div id="cards"></div>
+  </aside>
+</main>
+
+<dialog id="settings" class="settings">
+  <form method="dialog" id="settingsForm">
+    <h2>Settings</h2>
+    <fieldset>
+      <legend>Units</legend>
+      <label for="uTemp">Temperature</label>
+      <select id="uTemp"><option value="c">°C</option><option value="f">°F</option></select>
+      <label for="uWind">Wind and current</label>
+      <select id="uWind"><option value="kt">knots</option><option value="kmh">km/h</option><option value="mph">mph</option><option value="ms">m/s</option></select>
+      <label for="uLen">Waves and visibility</label>
+      <select id="uLen"><option value="m">metres / km</option><option value="ft">feet / miles</option></select>
+      <label for="uPres">Pressure</label>
+      <select id="uPres"><option value="hpa">hPa</option><option value="inhg">inHg</option></select>
+    </fieldset>
+    <fieldset>
+      <legend>Satellite layer</legend>
+      <label for="satKind">Imagery</label>
+      <select id="satKind"><option value="ir">GOES infrared clouds (10-minute, Americas)</option><option value="viirs">VIIRS true colour (daily, global)</option></select>
+    </fieldset>
+    <fieldset>
+      <legend>Weather Underground</legend>
+      <label for="wuKey">API key</label>
+      <input id="wuKey" type="password" autocomplete="off" placeholder="From your WU member settings (PWS owners)">
+      <label for="wuStation">Station ID (optional)</label>
+      <input id="wuStation" autocomplete="off" placeholder="Nearest station when empty, e.g. KFLMIAMI123">
+    </fieldset>
+    <fieldset>
+      <legend>Refresh</legend>
+      <label for="refreshMin">Refresh every</label>
+      <select id="refreshMin"><option value="5">5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="0">Manual only</option></select>
+    </fieldset>
+    <div class="dlg-actions">
+      <button value="cancel" class="btn ghost">Cancel</button>
+      <button value="save" id="saveSettings" class="btn primary">Save</button>
+    </div>
+  </form>
+</dialog>
+<!--/EAGLE:BODY-->
+<script src="vendor/d3.min.js"></script>
+<script src="js/land.js"></script>
+<script src="js/geo.js"></script>
+<script src="js/sources.js"></script>
+<script src="js/sample.js"></script>
+<script src="js/render.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

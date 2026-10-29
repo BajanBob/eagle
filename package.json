@@ -1,0 +1,108 @@
+{
+  "name": "eagle",
+  "productName": "Eagle",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Eagle: god-view globe and geochron map with live weather, air quality, marine, aviation and sargassum data for any grid square or lat/lon.",
+  "main": "electron/main.js",
+  "author": {
+    "name": "Eagle",
+    "email": "you@example.com"
+  },
+  "homepage": "https://example.com/eagle",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "start:kiosk": "electron . --kiosk",
+    "serve": "npx --yes http-server www -p 8080 -c-1",
+    "dist:linux": "electron-builder --linux AppImage deb --x64",
+    "dist:pi": "electron-builder --linux AppImage deb --arm64 --armv7l",
+    "dist:win": "electron-builder --win nsis portable --x64 --arm64",
+    "dist:mac": "electron-builder --mac dmg zip --universal",
+    "android:add": "cap add android && node scripts/patch-native.js android && cap sync android",
+    "android:apk": "cap sync android && cd android && ./gradlew assembleDebug",
+    "ios:add": "cap add ios --packagemanager SPM && node scripts/patch-native.js ios && cap sync ios",
+    "ios:open": "cap open ios",
+    "icons": "capacitor-assets generate --iconBackgroundColor '#0a1018' --splashBackgroundColor '#0a1018'",
+    "build:single": "node scripts/build-single.js"
+  },
+  "build": {
+    "appId": "com.eagle.globe",
+    "productName": "Eagle",
+    "copyright": "Copyright \u00a9 2026",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**",
+      "www/**",
+      "build/icon.png",
+      "package.json"
+    ],
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Science",
+      "icon": "build/icon.png",
+      "synopsis": "Weather, marine and sargassum globe",
+      "desktop": {
+        "entry": {
+          "Name": "Eagle",
+          "Comment": "God-view globe and geochron weather map"
+        }
+      }
+    },
+    "deb": {
+      "depends": [
+        "libgtk-3-0",
+        "libnotify4",
+        "libnss3",
+        "libxss1",
+        "libxtst6",
+        "xdg-utils",
+        "libatspi2.0-0",
+        "libuuid1",
+        "libsecret-1-0"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Eagle",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "mac": {
+      "category": "public.app-category.weather",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "build/icon.png",
+      "hardenedRuntime": false,
+      "identity": null
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}.${ext}"
+    }
+  },
+  "devDependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  }
+}
